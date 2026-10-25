@@ -27,6 +27,7 @@ function fakeFetch(q) {
       if (q === 'x') return reject(new Error('Szerverhiba (503)'));
       resolve(ADAT.filter(n => n.toLowerCase().startsWith(q.toLowerCase())));
     }, kesleltetes);
+    console.log('Keresés: ' + q + ', válaszidő: ' + kesleltetes.toFixed(0) + ' ms');
   });
 }
 function fakePrice(nev) {
@@ -35,11 +36,17 @@ function fakePrice(nev) {
 const input = document.getElementById('q');
 const allapot = document.getElementById('allapot');
 
+let utolsoKeres = 0;
+
 input.addEventListener('input', () => {
   const q = input.value.trim();
+  const keresettId = ++utolsoKeres;
   allapot.textContent = 'Keresés…';
   try {
-    fakeFetch(q).then(megjelenit);
+    fakeFetch(q).then(nevek => {
+      if (keresettId !== utolsoKeres) return; // elavult keresés, nem jelenítjük meg
+      megjelenit(nevek);
+    });
   } catch (e) {
     allapot.textContent = 'Hiba: ' + e.message;
   }
