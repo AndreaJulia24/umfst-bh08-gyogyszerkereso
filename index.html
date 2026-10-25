@@ -21,6 +21,7 @@
 const ADAT = ['Algopyrin', 'Aspirin', 'Amoxicillin', 'Augmentin', 'Algoflex', 'Betaloc', 'Cataflam', 'Cetirizin', 'Diclofenac'];
 // Szimulált szerver: a rövidebb (általánosabb) keresés lassabban válaszol
 function fakeFetch(q) {
+  console.log('Keresés indult: ' + q);  
   return new Promise((resolve, reject) => {
     const kesleltetes = Math.max(50, 1200 - q.length * 250 + Math.random() * 200);
     setTimeout(() => {
@@ -37,19 +38,24 @@ const input = document.getElementById('q');
 const allapot = document.getElementById('allapot');
 
 let utolsoKeres = 0;
+let debounceId;
+
 
 input.addEventListener('input', () => {
-  const q = input.value.trim();
-  const keresettId = ++utolsoKeres;
-  allapot.textContent = 'Keresés…';
-  try {
-    fakeFetch(q).then(nevek => {
-      if (keresettId !== utolsoKeres) return; // elavult keresés, nem jelenítjük meg
-      megjelenit(nevek);
-    });
-  } catch (e) {
-    allapot.textContent = 'Hiba: ' + e.message;
-  }
+  clearTimeout(debounceId);
+  debounceId = setTimeout(() =>{
+    const q = input.value.trim();
+    const keresettId = ++utolsoKeres;
+    allapot.textContent = 'Keresés…';
+    try {
+        fakeFetch(q).then(nevek => {
+        if (keresettId !== utolsoKeres) return; // elavult keresés, nem jelenítjük meg
+        megjelenit(nevek);
+        });
+    } catch (e) {
+        allapot.textContent = 'Hiba: ' + e.message;
+    }
+  }, 300);
 });
 
 function megjelenit(nevek) {
