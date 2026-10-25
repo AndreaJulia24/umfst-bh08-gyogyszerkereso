@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gyógyszerkereső</title>
+<style>
+  body { font: 16px system-ui, sans-serif; background: #fff; color: #1b2421; max-width: 600px; margin: auto; padding: 16px; }
+  #allapot { color: #5b6b66; }
+</style>
+</head>
+<body>
+<h1>Gyógyszerkereső</h1>
+<label for="q">Hatóanyag vagy márkanév (próbáld: „x” = szerverhiba)</label>
+<input id="q" autocomplete="off">
+<p id="allapot" aria-live="polite"></p>
+<ul id="talalatok"></ul>
+<button id="frissit" type="button">Automatikus frissítés</button>
+<p>Találatok listaáron összesen: <output id="osszeg">0</output> lej</p>
+<script>
+const ADAT = ['Algopyrin', 'Aspirin', 'Amoxicillin', 'Augmentin', 'Algoflex', 'Betaloc', 'Cataflam', 'Cetirizin', 'Diclofenac'];
+// Szimulált szerver: a rövidebb (általánosabb) keresés lassabban válaszol
+function fakeFetch(q) {
+  return new Promise((resolve, reject) => {
+    const kesleltetes = Math.max(50, 1200 - q.length * 250 + Math.random() * 200);
+    setTimeout(() => {
+      if (q === 'x') return reject(new Error('Szerverhiba (503)'));
+      resolve(ADAT.filter(n => n.toLowerCase().startsWith(q.toLowerCase())));
+    }, kesleltetes);
+  });
+}
+function fakePrice(nev) {
+  return new Promise(r => setTimeout(() => r(10 + nev.length), 100 + Math.random() * 300));
+}
+const input = document.getElementById('q');
+const allapot = document.getElementById('allapot');
+
+input.addEventListener('input', () => {
+  const q = input.value.trim();
+  allapot.textContent = 'Keresés…';
+  try {
+    fakeFetch(q).then(megjelenit);
+  } catch (e) {
+    allapot.textContent = 'Hiba: ' + e.message;
+  }
+});
+
+function megjelenit(nevek) {
+  const ul = document.getElementById('talalatok');
+  ul.textContent = '';
+  nevek.forEach(n => {
+    const li = document.createElement('li');
+    li.textContent = n;
+    ul.appendChild(li);
+  });
+  allapot.textContent = nevek.length + ' találat';
+  osszesit(nevek);
+}
+
+async function osszesit(nevek) {
+  let osszeg = 0;
+  nevek.forEach(async n => { osszeg += await fakePrice(n); });
+  document.getElementById('osszeg').textContent = osszeg;
+}
+
+document.getElementById('frissit').addEventListener('click', () => {
+  setInterval(() => {
+    fakeFetch(input.value.trim()).then(megjelenit);
+  }, 2000);
+});
+</script>
+</body>
+</html>
