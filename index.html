@@ -87,15 +87,39 @@ async function osszesit(nevek) {
   const arak = await Promise.all(nevek.map(n => fakePrice(n)));
 
   const osszeg = arak.reduce((a, b) => a + b, 0); // Összeadjuk az árakat reduce() segítségével
-  
+
   document.getElementById('osszeg').textContent = osszeg;
 }
+let frissitId = null;
+const frissitGomb = document.getElementById('frissit');
 
-document.getElementById('frissit').addEventListener('click', () => {
-  setInterval(() => {
-    fakeFetch(input.value.trim()).then(megjelenit);
-  }, 2000);
+frissitGomb.addEventListener('click', () => {
+  if (frissitId === null) {
+    frissitId = setInterval(() => { // 3 másodpercenként frissítjük a találatokat
+      const q = input.value.trim();
+      if (q) {
+        const keresettId = ++utolsoKeres;
+        fakeFetch(q)
+          .then(nevek => {
+            if (keresettId !== utolsoKeres) return; // elavult keresés
+            megjelenit(nevek);
+          })
+          .catch(e => {
+            if (keresettId !== utolsoKeres) return; // elavult keresés
+            allapot.textContent = 'Hiba: ' + e.message;
+            document.getElementById('talalatok').textContent = '';
+            document.getElementById('osszeg').textContent = '0';
+          });
+      }
+    }, 3000);
+    frissitGomb.textContent = 'Automatikus frissítés leállítása';
+  } else {
+    clearInterval(frissitId);
+    frissitId = null;
+    frissitGomb.textContent = 'Automatikus frissítés';
+  }
 });
+
 </script>
 </body>
 </html>
