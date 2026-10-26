@@ -43,21 +43,28 @@ let debounceId;
 
 input.addEventListener('input', () => {
   clearTimeout(debounceId);
-  debounceId = setTimeout(() =>{
+  
+  debounceId = setTimeout(() => {
     const q = input.value.trim();
     const keresettId = ++utolsoKeres;
+    
     allapot.textContent = 'Keresés…';
-    try {
-        fakeFetch(q).then(nevek => {
-        if (keresettId !== utolsoKeres) return; // elavult keresés, nem jelenítjük meg
+
+    fakeFetch(q)
+      .then(nevek => {
+        if (keresettId !== utolsoKeres) return; // elavult keresés
         megjelenit(nevek);
-        });
-    } catch (e) {
+      })
+      .catch(e => {
+        // Itt kapjuk el az aszinkron szerverhibát!
+        if (keresettId !== utolsoKeres) return; // elavult keresés
         allapot.textContent = 'Hiba: ' + e.message;
-    }
+        document.getElementById('talalatok').textContent = '';
+        document.getElementById('osszeg').textContent = '0';
+      });
   }, 300);
 });
-
+    
 function megjelenit(nevek) {
   const ul = document.getElementById('talalatok');
   ul.textContent = '';
