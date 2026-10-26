@@ -78,8 +78,16 @@ function megjelenit(nevek) {
 }
 
 async function osszesit(nevek) {
-  let osszeg = 0;
-  nevek.forEach(async n => { osszeg += await fakePrice(n); });
+  if (nevek.length === 0) {
+    document.getElementById('osszeg').textContent = '0';
+    return;
+  }
+
+  //Promises.all() várja az összes ár lekérését, majd összeadja azokat
+  const arak = await Promise.all(nevek.map(n => fakePrice(n)));
+
+  const osszeg = arak.reduce((a, b) => a + b, 0); // Összeadjuk az árakat reduce() segítségével
+  
   document.getElementById('osszeg').textContent = osszeg;
 }
 
