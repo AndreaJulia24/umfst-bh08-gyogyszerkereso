@@ -44,6 +44,6 @@ Készítette: Czellecz Andrea-Julia, INFO-LM III.ev
 ## Összegzés
 ## Mit tanultam:
 A feladat során mélyebben megértettem az aszinkron JavaScript működését és az eseményhurok (event loop) sajátosságait. Megtanultam, hogyan védekezzek a versenyhelyzetek (race conditions) ellen, hogyan optimalizáljam a hálózati kéréseket debounce technikával, és miért elengedhetetlen a Promise-ok helyes bevárása (`Promise.all` a `forEach` helyett), valamint az aszinkron hibakezelés (`.catch()`). Ezen felül megtanultam figyelni az erőforrások tudatos kezelésére is (időzítők leállítása).
--
+
 ## Melyik alapelv sérült a leggyakrabban:
 Egyértelműen az **aszinkron folyamatok (Promise-ok) és az eseményhurok helytelen kezelésének** elve sérült a legtöbbször. Az 1., 3. és 4. hibánál is abból fakadt a probléma, hogy az eredeti kód szinkron módon próbált kezelni aszinkron történéseket (nem vette figyelembe az időbeli csúszásokat, a mikrotask sor működését). Emellett az **erőforrás-menedzsment és optimalizáció** (debounce hiánya, lezáratlan `setInterval`) is visszatérő hiányosság volt.
